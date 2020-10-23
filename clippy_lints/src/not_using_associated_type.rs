@@ -1,8 +1,10 @@
+#![allow(unused)]
+
+use crate::utils::span_lint;
 use if_chain::if_chain;
-use rustc_lint::{EarlyLintPass, EarlyContext};
-use rustc_middle::lint::in_external_macro;
-use rustc_session::{declare_lint_pass, declare_tool_lint};
-use rustc_ast::ast::*;
+use rustc_lint::{LateLintPass, LateContext};
+use rustc_session::{impl_lint_pass, declare_tool_lint};
+use rustc_hir::{ImplItem, ImplItemKind, Path, PathSegment, QPath, TyKind};
 
 declare_clippy_lint! {
     /// **What it does:** Checks for references to a concrete type where an associated type could
@@ -63,26 +65,62 @@ declare_clippy_lint! {
 
 #[derive(Default)]
 pub struct NotUsingAssociatedType {
-    assoc_types : Vec<AssocItem>,
-}
-
-impl NotUsingAssociatedType {
-    fn new() -> Self {
-        Default::default()
-    }
+    //assoc_types : Vec<(Ty, Ident)>,
 }
 
 impl_lint_pass!(NotUsingAssociatedType => [NOT_USING_ASSOCIATED_TYPE]);
 
-impl EarlyLintPass for NotUsingAssociatedType {
-    
-    fn check_impl_item(&mut self, cx: &EarlyContext<'_>, item: &AssocItem) {
-        if let TyAlias(_,_,_,Some(concrete_ty)) = item.kind {
-            self.assoc_types.push(item);
-        } 
+impl LateLintPass<'tcx> for NotUsingAssociatedType {
+    fn check_impl_item(&mut self, cx: &LateContext<'tcx>, item: &ImplItem<'tcx>) {
+        if let ImplItemKind::TyAlias(concrete_ty) = item.kind {
+            if let TyKind::Path(concrete_path) = &concrete_ty.kind {
+                match concrete_path {
+                    QPath::Resolved(None, _) => {
+                            span_lint(
+                            cx,
+                            NOT_USING_ASSOCIATED_TYPE,
+                            item.span,
+                            "This is a TyAlias -> Resolved(None, Path)",
+                        );
+                    },
+                    QPath::Resolved(Some(_), _) => {
+                            span_lint(
+                            cx,
+                            NOT_USING_ASSOCIATED_TYPE,
+                            item.span,
+                            "This is a TyAlias -> Resolved(Some(_), Path)",
+                        );
+                    },
+                    QPath::TypeRelative(_, _) => {
+                        span_lint(
+                            cx,
+                            NOT_USING_ASSOCIATED_TYPE,
+                            item.span,
+                            "This is a TyAlias -> TypeRelative(_, _)",
+                        );
+                    },
+                    QPath::LangItem(_, _) => {
+                        span_lint(
+                            cx,
+                            NOT_USING_ASSOCIATED_TYPE,
+                            item.span,
+                            "This is a TyAlias -> LangItem(_, _)",
+                        );
+                    }
+                }
+            } else {
+                span_lint(
+                    cx,
+                    NOT_USING_ASSOCIATED_TYPE,
+                    item.span,
+                    "This is a TyAlias not to a path",
+                );
+            }
+        }
     }
-
-    fn check_impl_item_post(&mut self, cx: &EarlyContext<'_>, item: &AssocItem) {
+/*
+    fn check_impl_item_post(&mut self, cx: &LateContext<'tcx>, item: &ImplItem<'tcx>) {
 
     }
+*/
 }
