@@ -281,6 +281,7 @@ mod new_without_default;
 mod no_effect;
 mod non_copy_const;
 mod non_expressive_names;
+mod not_using_associated_type;
 mod open_options;
 mod option_env_unwrap;
 mod option_if_let_else;
@@ -832,6 +833,7 @@ pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf:
         &non_expressive_names::JUST_UNDERSCORES_AND_DIGITS,
         &non_expressive_names::MANY_SINGLE_CHAR_NAMES,
         &non_expressive_names::SIMILAR_NAMES,
+        &not_using_associated_type::NOT_USING_ASSOCIATED_TYPE,
         &open_options::NONSENSICAL_OPEN_OPTIONS,
         &option_env_unwrap::OPTION_ENV_UNWRAP,
         &option_if_let_else::OPTION_IF_LET_ELSE,
@@ -2007,6 +2009,7 @@ pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf:
         LintId::of(&mutable_debug_assertion::DEBUG_ASSERT_WITH_MUT_CALL),
         LintId::of(&mutex_atomic::MUTEX_INTEGER),
         LintId::of(&needless_borrow::NEEDLESS_BORROW),
+        LintId::of(&not_using_associated_type::NOT_USING_ASSOCIATED_TYPE),
         LintId::of(&path_buf_push_overwrite::PATH_BUF_PUSH_OVERWRITE),
         LintId::of(&redundant_pub_crate::REDUNDANT_PUB_CRATE),
         LintId::of(&strings::STRING_LIT_AS_BYTES),
