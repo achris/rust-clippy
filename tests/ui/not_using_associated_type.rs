@@ -16,7 +16,6 @@ pub trait TraitWithOneAssociatedType {
 }
 
 impl TraitWithOneAssociatedType for TestWithAssociatedState {
-    type Associated = State;
     fn do_something(&self, associated: &Self::Associated) {
         match associated {
             // These lines should warn
@@ -28,6 +27,7 @@ impl TraitWithOneAssociatedType for TestWithAssociatedState {
             _ => println!("Something else"),
         }
     }
+    type Associated = State;
 }
 
 // Another example where the same type as the associated type is used elsewhere
